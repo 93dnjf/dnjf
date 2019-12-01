@@ -4,25 +4,59 @@ import {
     Text, 
     TouchableOpacity, 
     StyleSheet,
-    Dimensions
+    Dimensions,
+    TextInput
  } from "react-native";
+ import PropTypes from "prop-types";
 
 const { width, height } = Dimensions.get("window");
 
 export default class ToDo extends Component {
+    static PropTypes = {
+        text: PropTypes.string.isRequired,
+        isCompleted: PropTypes.bool.isRequired
+    }
     state = {
         isEditing: false,
-        isCompleted: false
+        toDoValue: ""
     };
     render() {
-        const { isCompleted, isEditing } = this.state;
+        const { isCompleted, isEditing, toDoValue } = this.state;
+        const { text } = this.props;
         return (
             <View style={styles.container}>
                 <View style={styles.column}>
                 <TouchableOpacity onPress={this._toggleComplete}>
-                    <View style={[styles.circle, isCompleted ? styles.completedCircle : styles.uncompletedCircle]} />
+                    <View
+                        style={[
+                        styles.circle,
+                        isCompleted ? styles.completedCircle : styles.uncompletedCircle
+                        ]}
+                    />
                 </TouchableOpacity>
-                <Text style={[styles.text, isCompleted ? styles.completeText : styles.uncompleteText]}>TDDDDDD</Text>
+                {isEditing ? (
+                    <TextInput 
+                        style={[
+                            styles.text,
+                            styles.input,
+                            isCompleted ? styles.completeText : styles.uncompleteText
+                        ]}
+                        value={toDoValue}
+                        multiline={true}
+                        onChangeText={this._controlInput}
+                        returnKeyType={"done"}
+                        onBlur={this._finishEditing}
+                    />
+                ) : (
+                    <Text 
+                    style={[
+                        styles.text, 
+                        isCompleted ? styles.completeText : styles.uncompleteText
+                    ]}
+                >
+                    {text}
+                </Text>
+                )}
                 </View>
                 {isEditing ? (
                 <View style={styles.actions}>
@@ -57,13 +91,20 @@ export default class ToDo extends Component {
         });
     };
     _startEditing = () => {
+        const{ text } = this.props;
         this.setState({
-            isEditing: true
+            isEditing: true,
+            toDoValue: text
         });
     };
     _finishEditing = () => {
         this.setState({
             isEditing: false
+        });
+    };
+    _controlInput = (text) => {
+        this.setState({
+            toDoValue: text
         });
     };
 }
@@ -105,8 +146,7 @@ const styles = StyleSheet.create({
     column: {
         flexDirection: "row",
         alignItems: "center",
-        width: width / 2,
-        justifyContent: "space-between"
+        width: width / 2
     },
     actions: {
         flexDirection: "row"
@@ -114,5 +154,10 @@ const styles = StyleSheet.create({
     actionContainer: {
         marginVertical: 10,
         marginHorizontal: 10
+    },
+    input: {
+        marginVertical: 15,
+        width: width / 2,
+        paddingBottom: 5
     }
 });
